@@ -1,0 +1,17 @@
+[SaveTV]
+Benutzername=
+Passwort=
+UserId=
+
+[System]
+MovieDir = /mnt/storage/movies/savetv
+TvShowDir = /mnt/storage/tvseries/german-tv
+
+[Optionen]
+DeleteAfterDownload = yes
+FileNameSuffix = (\s*\d{4}-\d{2}-\d{2} \d{4} 478139).mp4
+
+[Shows]
+Castle = 83462,(Castle) (.*)
+Star Trek Deep Space Nine = (Star Trek - Deep Space Nine) (.*)
+According to Jim = (Immer wieder Jim) (.*)
