@@ -1,9 +1,11 @@
 import os
+import re
 import sys
 import ConfigParser
 import atexit
 import logging
 import subprocess
+import glob
 
 from SaveTvEntity import SaveTvEntity
 from SaveTvDownloadWorker import SaveTvDownloadWorker
@@ -45,7 +47,8 @@ class SaveTvDownloader:
             renamer = SaveTvRenamer(self.logger)
             for rec in availableRecordings:
                 series  = rec['series']
-                episode = rec['episode']                    
+                episode = rec['episode']
+                adfree = rec['adfree']
                 
                 try:
                     self.logger.debug("Getting " + series + " - " + episode)
@@ -63,11 +66,27 @@ class SaveTvDownloader:
                         path = renamer.getPath(series, episode, None)
                         if (path is None):
                             continue
-                        
+
+                        s = re.search("^(.+\d+x\d\d)", path)
+                        if (s is not None):
+                            namepart = s.group(1)
+                            fnames = glob.glob(namepart + "*.*")
+                            namepart = namepart.replace("german-tv", "dvd")
+                            fnames.extend(glob.glob(namepart + "*.*"))
+                            for f in fnames:
+                                self.logger.debug(f)
+                                if (f.endswith(".mp4") or f.endswith(".mkv") or f.endswith(".avi")):
+                                    self.logger.info("File " + path + " already exists. Deleting from server")
+                                    svte.deleteFile(telecastId)
+                                    
+                    if (adfree == 0):
+                        continue
+                                    
                     downloader = SaveTvDownloadWorker(self, link, path, self.logger)
                     file_complete = downloader.download()
                     if self.DELETE_AFTER_DOWNLOAD and file_complete:
                        svte.deleteFile(telecastId)
+                       
                 except Exception as ex:
                     self.logger.error(ex)
                     continue

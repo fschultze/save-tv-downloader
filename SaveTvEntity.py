@@ -2,6 +2,7 @@ from mechanize import Browser
 import os
 import sys
 import re
+import glob
 import socket
 import urllib
 import datetime
@@ -57,6 +58,7 @@ class SaveTvEntity:
                         self.logger.debug("Total: %d" % countTotal)
 
                     for archiveentry in jdata['ARRVIDEOARCHIVEENTRIES']:
+           
                         telecastentry = archiveentry['STRTELECASTENTRY']
                         series = telecastentry['STITLE']
                         episode = telecastentry['SSUBTITLE']
@@ -64,16 +66,16 @@ class SaveTvEntity:
                         status = telecastentry['SSTATUS']
                         adfree = telecastentry['BADFREEAVAILABLE']
                         telecastId = telecastentry['ITELECASTID']
-                        entry = {'telecastId':telecastId,'series':series,'episode':episode}
+                        entry = {'telecastId':telecastId,'series':series,'episode':episode,'adfree':adfree}
                         self.logger.debug("%s - %s, Startdate: %s, Status: %s, Ad-Free: %d, Telecast-ID: %d" % (series, episode, startdate, status, adfree, telecastId))
                         
-                        if (status == "FAILED"):
+                        if (status == "FAILED" or status == "Sendung entfallen"):
                             self.logger.info("Cancelled. Deleting file.")
                             self.deleteFile(telecastId)
-                        elif (status == "OK" and adfree == 1):
-                            #print "%s - %s, Startdate: %s, Status: %s, Ad-Free: %d, Telecast-ID: %d" % (series, episode, startdate, status, adfree, telecastId)
+                            
+                        elif (status == "OK"):
                             telecastIds.append(entry)
-
+                                    
                     #f.close
                             
                     if (countTotal >= 50):
